@@ -1,0 +1,18 @@
+.btn {
+  border: 1px solid gray;
+  border-radius: 4px;
+  padding: 8px 12px;
+  width: 80px;
+  cursor: pointer;
+}
+.container {
+  display: flex;
+  justify-content: space-between;
+}
+
+.text {
+  margin: 0;
+  display: flex;
+  justify-content: start;
+  align-items: start;
+}
