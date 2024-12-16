@@ -1,42 +1,29 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import "./App.css";
 import ContactForm from "./components/ContactForm/ContactForm";
 import ContactList from "./components/ContactList/ContactList";
 import SearchBox from "./components/SearchBox/SearchBox";
-import { initialState } from "./redux/contactsSlice";
+import { useDispatch, useSelector } from "react-redux";
+import { selectError, selectIsLoadind } from "./redux/filtersSlice";
+import { fetchContacts } from "./redux/contactsOps";
 function App() {
-  const [contacts, setContacts] = useState(() => {
-    const savedContactsList = localStorage.getItem("contacts");
-    return savedContactsList ? JSON.parse(savedContactsList) : initialState;
-  });
-  const [filter, setFilter] = useState("");
+  const dispatch = useDispatch();
+  const isLoading = useSelector(selectIsLoadind);
+  const error = useSelector(selectError);
 
   useEffect(() => {
-    localStorage.setItem("contacts", JSON.stringify(contacts));
-  }, [contacts]);
-
-  const addContact = (newContact) => {
-    setContacts((prevContacts) => {
-      return [...prevContacts, newContact];
-    });
-  };
-
-  const deleteContact = (contactId) => {
-    setContacts((prevContacts) => {
-      return prevContacts.filter((contact) => contact.id !== contactId);
-    });
-  };
-  const filteredContacts = contacts.filter((contact) =>
-    contact.name.toLowerCase().includes(filter.toLocaleLowerCase())
-  );
+    dispatch(fetchContacts());
+  }, [dispatch]);
 
   return (
     <>
       <div>
+        {isLoading && <p>Loading...</p>}
+        {error && <p>Ooops...</p>}
         <h1>Phonebook</h1>
-        <ContactForm onAdd={addContact} />
-        <SearchBox value={filter} onFilter={setFilter} />
-        <ContactList contacts={filteredContacts} onDelete={deleteContact} />
+        <ContactForm />
+        <SearchBox />
+        <ContactList />
       </div>
     </>
   );
