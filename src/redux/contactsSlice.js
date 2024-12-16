@@ -1,5 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { fetchContacts } from "./contactsOps";
+import { createSelector, createSlice, isAnyOf } from "@reduxjs/toolkit";
+import { addContact, deleteContact, fetchContacts } from "./contactsOps";
 
 export const initialState = {
   contacts: {
@@ -13,46 +13,78 @@ export const initialState = {
 };
 
 const handlePending = (state) => {
-  state.isLoading = true;
+  state.loading = true;
 };
 
 const handleRejected = (state, action) => {
-  state.isLoading = false;
+  state.loading = false;
   state.error = action.payload;
 };
 
-const slice = createSlice({
+const sliceContacts = createSlice({
   name: "contacts",
   initialState,
   extraReducers: (builder) => {
     builder
-      .addCase(fetchContacts.pending, handlePending)
       .addCase(fetchContacts.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.error = null;
-        state.items = action.payload;
+        state.contacts.error = null;
+        state.contacts.items = action.payload;
       })
-      .addCase(fetchContacts.rejected, handleRejected)
-      .addCase(deleteContact.pending, handlePending)
       .addCase(deleteContact.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.error = null;
-        state.items = action.payload.id;
+        state.contacts.error = null;
+        state.contacts.items = state.contacts.items.filter(
+          (contact) => contact.id !== action.payload
+        );
       })
-      .addCase(deleteContact.rejected, handleRejected)
-      .addCase(addContact.pending, handlePending)
       .addCase(addContact.fulfilled, (state, action) => {
-        state.isLoading = false;
-        state.error = null;
-        state.items.push(action.payload);
+        state.contacts.error = null;
+        state.contacts.items.push(action.payload);
       })
-      .addCase(addContact.rejected, handleRejected);
+      .addMatcher(
+        isAnyOf(
+          fetchContacts.pending,
+          deleteContact.pending,
+          addContact.pending
+        ),
+        handlePending
+      )
+      .addMatcher(
+        isAnyOf(
+          fetchContacts.rejected,
+          deleteContact.rejected,
+          addContact.rejected
+        ),
+        handleRejected
+      )
+      .addMatcher(
+        isAnyOf(
+          fetchContacts.fulfilled,
+          deleteContact.fulfilled,
+          addContact.fulfilled
+        ),
+        (state) => {
+          state.contacts.loading = false;
+        }
+        // (state) => {
+        //   state.contacts.error = null;
+        // }
+      );
   },
 });
 
-export const { addContact, deleteContact } = slice.actions;
+export const selectContacts = (state) => state.contacts.item;
+export const selectIsLoading = (state) => state.contacts.loading;
+export const selectError = (state) => state.contacts.error;
+export const selectContactsFilter = (state) => state.filters.name;
+export const selectFilteredContacts = createSelector(
+  [selectContacts, selectContactsFilter],
+  (contacts, filter) =>
+    contacts.filter((contact) =>
+      contact.name.toLowerCase().includes(filter.toLowerCase())
+    )
+);
 
-export default slice.reducer;
+export default sliceContacts.reducer;
 
 //  створи та експортуй мемоізований селектор selectFilteredContacts за допомогою функції createSelector.
 // Селектор повинен залежати від поточних масиву контактів і значення фільтра, та повертати відфільтрований масив контактів.
