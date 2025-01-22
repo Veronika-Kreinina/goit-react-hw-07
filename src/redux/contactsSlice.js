@@ -24,17 +24,14 @@ const sliceContacts = createSlice({
   extraReducers: (builder) => {
     builder
       .addCase(fetchContacts.fulfilled, (state, action) => {
-        state.contacts.error = null;
         state.contacts.items = action.payload;
       })
       .addCase(deleteContact.fulfilled, (state, action) => {
-        state.contacts.error = null;
         state.contacts.items = state.contacts.items.filter(
           (contact) => contact.id !== action.payload
         );
       })
       .addCase(addContact.fulfilled, (state, action) => {
-        state.contacts.error = null;
         state.contacts.items.push(action.payload);
       })
       .addMatcher(
@@ -61,11 +58,23 @@ const sliceContacts = createSlice({
         ),
         (state) => {
           state.contacts.loading = false;
+          state.contacts.error = null;
         }
-        // (state) => {
-        //   state.contacts.error = null;
-        // }
       );
+    // state.contacts.error = null;
+    // .addMatcher(
+    //     isAnyOf(
+    //       fetchContacts.fulfilled,
+    //       deleteContact.fulfilled,
+    //       addContact.fulfilled
+    //     ),
+    //     (state) => {
+    //       state.contacts.loading = false;
+    //     },
+    //     (state) => {
+    //       state.contacts.error = null;
+    //     }
+    //   );
   },
 });
 

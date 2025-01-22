@@ -43,3 +43,14 @@ export const deleteContact = createAsyncThunk(
     }
   }
 );
+
+// export const addContact = createAsyncThunk(
+//   "contacts/addContact",
+//   async ({ name, number }, thunkAPI) => {
+//     try {
+//       await axios.post("/contacts", { name, number });
+//     } catch (error) {
+//       return thunkAPI.rejectWithValue(error.message);
+//     }
+//   }
+// );
